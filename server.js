@@ -26,7 +26,7 @@ io.use(async (socket, next) => {
             return next(new Error('No Project ID Found, Authentication error'));
         }
 
-        socket.project = await projectmodel.findById(projectId).lean()
+        socket.project = await projectmodel.findById(projectId);
 
         if (!token) {
             return next(new Error('No Token Found, Authentication error'));
@@ -44,12 +44,14 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', socket => {
+
+   socket.roomId = socket.project._id.toString();
     console.log('New client connected');
-    socket.join(socket.project.id);
+    socket.join(socket.roomId);
     
     socket.on('project-message', data => {
         console.log(data)
-        socket.broadcast.to(socket.project.id).emit('project-message', data)
+      socket.broadcast.to(socket.roomId).emit('project-message', data)
     })
 
     socket.on('event', data => { /* … */ });
