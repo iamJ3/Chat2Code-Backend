@@ -6,6 +6,8 @@ import projectsRoutes from './routes/project.routes.js';
 import userRouter from './routes/user.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
+import aiRoute from './routes/AI.routes.js';
+
 connect();
 
 const app = express();
@@ -15,6 +17,8 @@ app.use(cookieParser());
 app.use(cors());
 app.use('/projects', projectsRoutes);
 app.use('/users', userRouter);
+app.use('/ai',aiRoute)
+
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
