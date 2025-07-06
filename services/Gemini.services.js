@@ -1,11 +1,18 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_API_KEY,
+});
 
 export const generateResult = async (prompt) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-
-  const result = await model.generateContent(`
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `
 Your name is Sachi an ai and you  are an expert in all modern programming languages and frameworks with 10 years of experience.
 You always write modular, scalable code with clear comments, handle edge cases, and maintain existing functionality.
 Your code is clean, follows best practices, and includes proper error handling.
@@ -69,10 +76,14 @@ Always follow this structure strictly:
 - If not: only return "text".
 
 User request: ${prompt}
-`);
+`
+          }
+        ],
+      },
+    ],
+  });
 
-  const response = await result.response;
-  const rawText = response.text();
+  const rawText = result.candidates[0].content.parts[0].text;
 
   try {
     const parsed = JSON.parse(rawText);
