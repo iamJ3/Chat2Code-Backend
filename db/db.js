@@ -1,17 +1,19 @@
 import mongoose from "mongoose";
-console.log(process.env.MONGO_URI);
+import dotenv from "dotenv";
 
-// Connects to MongoDB using Mongoose
-function connect(){
-    mongoose.connect(process.env.MONGO_URI)
-    .then(()=>{
-        console.log("connected to Databse");
-        
-    })
-    .catch(err=>{
-        console.log(err);
-        
-    })
+dotenv.config();  // Ensure .env is loaded here if needed
+
+console.log('MONGO_URI:', process.env.MONGO_URI);  // Good debug!
+
+export default async function connect() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1); // Exit process if DB fails
+  }
 }
-
-export default connect;
