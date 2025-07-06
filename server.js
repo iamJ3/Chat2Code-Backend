@@ -6,10 +6,11 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import projectmodel from './models/project.model.js';
 import mongoose from 'mongoose';
+import { generateResult } from './services/Gemini.services.js';
 
 
 dotenv.config();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -45,18 +46,38 @@ io.use(async (socket, next) => {
 
 io.on('connection', socket => {
 
-   socket.roomId = socket.project._id.toString();
+    socket.roomId = socket.project._id.toString();
     console.log('New client connected');
     socket.join(socket.roomId);
-    
-    socket.on('project-message', data => {
-        console.log(data)
-      socket.broadcast.to(socket.roomId).emit('project-message', data)
+
+    socket.on('project-message', async data => {
+        const message = data.message;
+        console.log("ai is present");
+
+        const AipresentInMsg = message.includes('@Ai') || message.includes('@ai') || message.includes('@AI');
+        socket.broadcast.to(socket.roomId).emit('project-message',data)
+       
+        if (AipresentInMsg) {
+            const prompt = message.replace(/@Ai|@|@ai|@AI/g, '').trim();
+            const result = await generateResult(prompt);
+            io.to(socket.roomId).emit('project-message', {
+                message: result,
+                sender:{
+                    id:'ai',
+                    email:"Sachi AI"
+                }
+
+            });
+        }
     })
 
     socket.on('event', data => { /* … */ });
-    
-    socket.on('disconnect', () => { /* … */ });
+
+    socket.on('disconnect', () => { 
+        console.log('user disconnected');
+        socket.leave(socket.roomId)
+        
+       });
 
 });
 

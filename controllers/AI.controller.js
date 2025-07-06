@@ -1,7 +1,7 @@
 import * as ai from "../services/Gemini.services.js";
 
 export const generateResult = async (req, res) => {
-    const { prompt } = req.body;
+    const { prompt } = req.query;
 
     try {
         const result = await ai.generateResult(prompt);
