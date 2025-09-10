@@ -93,10 +93,26 @@ io.on('connection', socket => {
 
 // ✅ CONNECT TO DB + START SERVER
 const startServer = async () => {
-  await connect();
+  const dbResult = await connect();
+  
+  if (!dbResult.success) {
+    console.error("❌ Failed to connect to database:", dbResult.message);
+    console.error("❌ Server will start but database operations will fail");
+    console.error("❌ Please check your MongoDB connection string and try again");
+  }
+  
   server.listen(port, () => {
     console.log(`✅ Server running at http://localhost:${port}`);
+    if (dbResult.success) {
+      console.log("✅ Database connection established");
+    } else {
+      console.log("⚠️  Database connection failed - some features may not work");
+    }
   });
 };
 
 startServer();
+
+
+
+
